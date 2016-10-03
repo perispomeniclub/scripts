@@ -1,0 +1,26 @@
+#!/bin/bash
+# This script is meant to provide an easy and lazy way to the system admin to
+# add new users.
+#
+# The first argument is the desired username, the second argument is the 
+# Full Name and the third argument (optional) is the ssh key. When this argument
+# is provided the password is disabled and the key is posted in the user's 
+# authorized_keys file.
+
+username=$1
+fullname=$2
+
+if [ -z ${3+x} ] 
+    then 
+        echo "ussing password" 
+        password=`openssl rand -base64 32`
+        echo $password
+        adduser --gecos "$fullname,,,," --quiet --disabled-password $username
+        echo $username:$password | chpasswd
+    else 
+        echo "ssh key is provided. The password will be disabled"
+        sshkey=$3
+        adduser --gecos "$fullname,,,," --quiet --disabled-password $username
+        echo $sshkey > /home/$username/.ssh/authorized_keys 
+fi
+
